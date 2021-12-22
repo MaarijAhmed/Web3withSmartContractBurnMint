@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Collage Assigment ERC 20</h1>
+
+
+    <button onclick="printName()" id='btn-name'>Name</button> <span style="padding-left: 1em; font-size: large; font-weight: 900;" id="name"></span><br /><br />
+    <button onclick="printDecimal()" id='btn-decimal'>Decimal</button><span style="padding-left: 1em; font-size: large; font-weight: 900;"id="decimal"></span><br /><br />
+    <button onclick="printSymbol()" id='btn-symbol'></buttononclick>Symbol</button><span style="padding-left: 1em; font-size: large; font-weight: 900;"id="symbol"></span><br /><br />
+    <button onclick="printTotalSupply()" id='btn-total'>total supply</button><span style="padding-left: 1em; font-size: large; font-weight: 900;"id="totalSupply"></span><br /><br />
+    
+    <button
+      onclick="window.open('https://ropsten.etherscan.io/address/0xE87a33CF225dc01Ac4a22d8613343b9f0601040A')"
+    >
+      Smart contract</button
+    ><br />
+    <br />
+    <input id = 'wallet adderress' placeholder="enter wallet adderess" style="width: 250px; height: 30px; border-radius: 1em;  "/> <br /><br />
+    <input id = 'tokens' placeholder="enter ammount of tokens"  style="width: 250px; height: 30px; border-radius: 1em;"/>
+    <br /><br /><button onclick="sendTokens()">Transfer</button> <br /><br />
+    <script>
+      const ABI = [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "_burn",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Approval",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "approve",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "subtractedValue",
+              type: "uint256",
+            },
+          ],
+          name: "decreaseAllowance",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "addedValue",
+              type: "uint256",
+            },
+          ],
+          name: "increaseAllowance",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "recipient",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "transfer",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Transfer",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "sender",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "recipient",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "transferFrom",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+          ],
+          name: "allowance",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "balanceOf",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "decimals",
+          outputs: [
+            {
+              internalType: "uint8",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "name",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "symbol",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "totalSupply",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ];
+      async function loadWeb3() {
+        if (window.ethereum) {
+          window.web3 = new Web3(window.ethereum);
+          window.ethereum.enable();
+        } else {
+          alert("please install metamask");
+        }
+      }
+      async function load() {
+        await loadWeb3();
+        window.contract = await loadContract();
+        getName();
+        getDecimal();
+        getSymbol();
+        getTotalSupply();
+        
+      }
+      load();
+      async function loadContract() {
+        return await new window.web3.eth.Contract(
+          ABI,
+          "0xE87a33CF225dc01Ac4a22d8613343b9f0601040A"
+        );
+      }
+      async function getName() {
+        const name = await window.contract.methods.name().call();
+        console.log(name);
+        
+      }
+      async function printName() {
+        const name = await window.contract.methods.name().call();
+        console.log(name);
+        document.getElementById('name').innerHTML += ''
+        document.getElementById('name').innerHTML += name 
+        document.getElementById('btn-name').disabled = true
+
+      }
+      async function getDecimal() {
+        const decimal = await window.contract.methods.decimals().call();
+        console.log(decimal);
+      }
+      async function printDecimal(){
+        const decimal = await window.contract.methods.decimals().call();
+        document.getElementById('decimal').innerHTML += decimal
+        document.getElementById('btn-decimal').disabled = true
+
+      }
+      async function getSymbol() {
+        const decimal = await window.contract.methods.symbol().call();
+        console.log(decimal);
+      }
+      async function printSymbol(){
+        const symbol = await window.contract.methods.symbol().call();
+        document.getElementById('symbol').innerHTML += symbol
+        document.getElementById('btn-symbol').disabled = true
+
+      }
+      async function getTotalSupply() {
+        const totalsupply = await window.contract.methods.totalSupply().call();
+      }
+      async function printTotalSupply(){
+        const totalsupply = await window.contract.methods.totalSupply().call();
+        document.getElementById('totalSupply').innerHTML += totalsupply
+        document.getElementById('btn-total').disabled = true
+      }
+
+      function sendTokens() {
+        let amount = document.getElementById('tokens').value;
+        let adderess = document.getElementById('wallet adderress').value;
+        let tokenAmount = web3.utils.toWei(amount.toString(), "ether");
+        try{
+        window.contract.methods
+          .transfer(adderess, tokenAmount)
+          .send({
+            from: "0x4e6A54a933A5A3d02611150979Ad3114B6737b09",
+            gas: 210000,
+          })
+          .then((res) => {
+            console.log(res);
+            console.log(adderess)
+          })
+        }
+        catch(e){
+          alert(e)
+        }
+      }
+    </script>
+  </body>
+</html>
